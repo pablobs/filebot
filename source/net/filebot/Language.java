@@ -14,6 +14,9 @@ import java.util.stream.Stream;
 
 public class Language implements Serializable {
 
+	// code for intern use
+	private final String code;
+
 	// ISO 639-1 code
 	private final String iso_639_1;
 
@@ -23,18 +26,23 @@ public class Language implements Serializable {
 	// ISO 639-2/B code
 	private final String iso_639_2B;
 
+	// ISO 3166-1 alpha-3 code
+	private final String iso_3166_1;
+
 	// Language name
 	private final String[] names;
 
-	public Language(String iso_639_1, String iso_639_3, String iso_639_2B, String[] names) {
+	public Language(String code, String iso_639_1, String iso_639_3, String iso_639_2B, String iso_3166_1, String[] names) {
+		this.code = code;
 		this.iso_639_1 = iso_639_1;
 		this.iso_639_3 = iso_639_3;
 		this.iso_639_2B = iso_639_2B;
+		this.iso_3166_1 = iso_3166_1;
 		this.names = names.clone();
 	}
 
 	public String getCode() {
-		return iso_639_1;
+		return code;
 	}
 
 	public String getISO2() {
@@ -47,6 +55,9 @@ public class Language implements Serializable {
 
 	public String getISO3B() {
 		return iso_639_2B; // alternative 3-letter code
+	}
+
+	public String getISO3166_1() { return iso_3166_1; // 3-letter code
 	}
 
 	public String getName() {
@@ -63,11 +74,11 @@ public class Language implements Serializable {
 	}
 
 	public Locale getLocale() {
-		return new Locale(getCode());
+		return new Locale(getISO2(), getISO3166_1());
 	}
 
 	public boolean matches(String code) {
-		if (iso_639_1.equalsIgnoreCase(code) || iso_639_3.equalsIgnoreCase(code) || iso_639_2B.equalsIgnoreCase(code)) {
+		if (this.code.equalsIgnoreCase(code) || iso_639_1.equalsIgnoreCase(code) || iso_639_3.equalsIgnoreCase(code) || iso_639_2B.equalsIgnoreCase(code)) {
 			return true;
 		}
 		for (String it : names) {
@@ -80,7 +91,7 @@ public class Language implements Serializable {
 
 	@Override
 	public Language clone() {
-		return new Language(iso_639_1, iso_639_3, iso_639_2B, names);
+		return new Language(code, iso_639_1, iso_639_3, iso_639_2B, iso_3166_1, names);
 	}
 
 	public static final Comparator<Language> ALPHABETIC_ORDER = new Comparator<Language>() {
@@ -97,8 +108,8 @@ public class Language implements Serializable {
 		}
 
 		try {
-			String[] values = TAB.split(getProperty(code), 3);
-			return new Language(code, values[0], values[1], TAB.split(values[2]));
+			String[] values = TAB.split(getProperty(code), 5);
+			return new Language(code, values[0], values[1], values[2], values[3], TAB.split(values[4]));
 		} catch (Exception e) {
 			return null;
 		}
@@ -147,5 +158,4 @@ public class Language implements Serializable {
 	private static String getProperty(String key) {
 		return ResourceBundle.getBundle(Language.class.getName()).getString(key);
 	}
-
 }
